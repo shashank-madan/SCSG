@@ -110,7 +110,9 @@ Role is **never** a column on the user. That loses multi-role people, history, a
 
 Cub Master, Flock Leader, Scout Master, Guide Captain and Rover Scout Leader have identical permissions over their own section. Model one role, not five.
 
-`SECTION_LEADER` scoped to a section. The display label is derived from `role_type × section_type`. Adding Rangers means adding a section type and a label mapping — not a permission branch.
+`SECTION_MASTER` scoped to a section. The display label is derived from `role_type × section_type`. Adding Rangers means adding a section type and a label mapping — not a permission branch.
+
+**Naming follows BSG usage: "Master" is the adult, "Leader" is the youth.** A Scout Master is an adult; a Troop Leader is a Scout. `SECTION_MASTER` and `SECTION_LEADER` therefore mean very different things, and a permission check that confuses them would grant adult authority to a thirteen-year-old. `isYouthRole()` in the schema exists so code can ask the question directly rather than relying on reading the name carefully.
 
 **Section types:** Pack (Cubs), Flock (Bulbuls), Troop (Scouts), Company (Guides), Crew (Rovers), Team (Rangers).
 
@@ -118,14 +120,12 @@ Cub Master, Flock Leader, Scout Master, Guide Captain and Rover Scout Leader hav
 
 | Role | Scope | Notes |
 |---|---|---|
-| `GROUP_LEADER` | Group | GSM |
-| `SECTION_LEADER` | Section | Label derived per section type |
-| `ASSISTANT_SECTION_LEADER` | Section | |
-| `YOUTH_SENIOR` | Section | Troop Leader / Company Leader |
-| `YOUTH_LEADER` | Sub-unit | Renders "Sixer" in a Pack, "Patrol Leader" in a Troop |
-| `YOUTH_SECOND` | Sub-unit | "Second" in both |
-| `TREASURER` | Group | |
-| `SECRETARY` | Group | |
+| `GROUP_LEADER` | Group | **Adult.** In overall charge of the whole group |
+| `SECTION_MASTER` | Section | **Adult.** Cub Master, Scout Master, Guide Captain — label derived per section type |
+| `ASSISTANT_SECTION_MASTER` | Section | **Adult.** |
+| `SECTION_LEADER` | Section | **Youth.** Troop Leader / Company Leader |
+| `SUB_UNIT_LEADER` | Sub-unit | **Youth.** Renders "Sixer" in a Pack, "Patrol Leader" in a Troop |
+| `SUB_UNIT_SECOND` | Sub-unit | **Youth.** "Second" in both |
 | `GUARDIAN` | Person(s) | Derived from guardian links |
 | `MEMBER` | — | Baseline |
 
@@ -160,7 +160,9 @@ Youth role assignments end automatically at crossover. Adult ones do not — a S
 
 ### Platform roles (separate from scouting authority)
 
-A Scout Master is qualified to lead a Troop. That says nothing about whether they should be able to merge person records. These are **platform responsibilities**, assigned independently.
+A Scout Master is qualified to lead a Troop. That says nothing about whether they should be able to merge person records. These were to be **platform responsibilities**, assigned independently.
+
+> **Superseded in part by [ADR 0008](../adr/0008-minimal-role-set.md).** Registrar, Treasurer and Data & Safeguarding Officer do not ship as roles in v1 — they are committee job titles rather than distinct access levels, and a role nobody holds is complexity in every permission check. **The work below still has to exist**; it is the group leader's until someone holds a role for it. The table stays as the specification of that work.
 
 | Platform role | Owns |
 |---|---|
@@ -171,16 +173,16 @@ A Scout Master is qualified to lead a Troop. That says nothing about whether the
 
 Cross-cutting requirements:
 
-- **Granting adult roles requires GSM plus a second recorded approver.** Any role granting access to children's data goes through a two-person rule. Cheap to build, valuable if anything ever goes wrong.
-- **Safeguarding suspension must revoke all access instantly without deleting any record, in one click, available to the GSM at 11pm on a Sunday.** Design for this now, not later.
+- ~~**Granting adult roles requires a second recorded approver.**~~ Dropped by [ADR 0008](../adr/0008-minimal-role-set.md): a two-person rule needs two available adults, which a group this size does not reliably have. The audit log is the control instead.
+- **Safeguarding suspension must revoke all access instantly without deleting any record, in one click, available to the group leader at 11pm on a Sunday.** Design for this now, not later.
 - **Impersonation is always logged, never silent, and never available to section leaders.**
 - **Editing the past is categorically different from editing the present.** Separately gated, always logged.
 
 ### ~~Open decision — resolve before writing the schema~~ — Resolved
 
-~~Do Rovers and Rangers over 18 who help with a Pack get `ASSISTANT_SECTION_LEADER`, or a distinct `HELPER` role with narrower access?~~
+~~Do Rovers and Rangers over 18 who help with a Pack get `ASSISTANT_SECTION_MASTER`, or a distinct `HELPER` role with narrower access?~~
 
-**Resolved by [ADR 0004](../adr/0004-no-helper-role.md):** neither ships in v1. Role types are stored as data, so `HELPER` can be added later as a row rather than a migration. Until then, an over-18 helper is either granted `ASSISTANT_SECTION_LEADER` as an explicit recorded decision under the two-person rule, or given no system access.
+**Resolved by [ADR 0004](../adr/0004-no-helper-role.md):** neither ships in v1. Role types are stored as data, so `HELPER` can be added later as a row rather than a migration. Until then, an over-18 helper is either granted `ASSISTANT_SECTION_MASTER` as an explicit recorded decision under the two-person rule, or given no system access.
 
 ---
 
@@ -271,13 +273,14 @@ Scoped read access to own children only: progress, attendance, fee status, annou
 9. Payments and ledger.
 10. Learning modules.
 
-Platform-role tooling (Registrar merges, safeguarding suspension, audit log) should land alongside step 4, not be deferred to the end. Safeguarding suspension in particular is not a v2 feature.
+Platform tooling (person merges, safeguarding suspension, audit log) should land alongside step 4, not be deferred to the end. Safeguarding suspension in particular is not a v2 feature. Per [ADR 0008](../adr/0008-minimal-role-set.md) these are group-leader actions rather than separate roles.
 
 ---
 
 ## Decisions taken since v0.1
 
 - Event sourcing considered and rejected — [ADR 0001](../adr/0001-no-event-sourcing.md)
+- Four of the eleven role types dropped, and the two-person rule with them — [ADR 0008](../adr/0008-minimal-role-set.md)
 - Deletion, erasure and audit-log rules — [ADR 0002](../adr/0002-deletion-erasure-and-audit.md), which settles the §5 erasure-vs-retention question for the schema, leaving the safeguarding-notes retention basis open for the DPDPA reviewer.
 - Which tables carry `deleted_at`, and which are append-only instead — [ADR 0003](../adr/0003-soft-delete-scope.md)
 - The §4 `HELPER` question, resolved — [ADR 0004](../adr/0004-no-helper-role.md)
