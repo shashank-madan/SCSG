@@ -1,0 +1,23 @@
+{
+  "name": "scsg-monorepo",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.3.4",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @scsg/scsg-app dev",
+    "build": "pnpm --filter @scsg/scsg-app build",
+    "preview": "pnpm --filter @scsg/scsg-app preview",
+    "start": "pnpm --filter @scsg/scsg-app start",
+    "lint": "pnpm -r lint",
+    "format": "pnpm -r format",
+    "check": "pnpm -r check",
+    "db:generate": "pnpm --filter @scsg/scsg-app db:generate",
+    "db:migrate": "pnpm --filter @scsg/scsg-app db:migrate",
+    "db:push": "pnpm --filter @scsg/scsg-app db:push",
+    "db:pull": "pnpm --filter @scsg/scsg-app db:pull",
+    "db:studio": "pnpm --filter @scsg/scsg-app db:studio"
+  }
+}

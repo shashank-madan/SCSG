@@ -1,0 +1,13 @@
+# pnpm workspace root for the SCSG monorepo.
+# Add new deployables under apps/* and shared libraries under packages/*.
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# pnpm 11+ replaced onlyBuiltDependencies with allowBuilds: a map of
+# package -> boolean. Only these packages may run install/build scripts;
+# every other dependency's scripts stay blocked (the safe default). These
+# ship native binaries that must build on install.
+allowBuilds:
+  esbuild: true
+  '@sentry/cli': true

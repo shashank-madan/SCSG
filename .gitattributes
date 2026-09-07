@@ -1,0 +1,17 @@
+# Normalize line endings across OSes: store text as LF in the repo,
+# check out with the platform's native endings. Keeps diffs clean whether
+# a contributor is on Windows, macOS, or Linux.
+* text=auto eol=lf
+
+# Binary files must never be line-ending converted.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
+
+# Lockfile: text, LF, but mark as generated so diffs collapse in reviews.
+pnpm-lock.yaml linguist-generated=true -diff
