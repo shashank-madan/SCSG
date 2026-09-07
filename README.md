@@ -1,5 +1,16 @@
 # SCSG
 
+Group management platform for **Sri Chamundi Scout Group**, a Bharat Scouts & Guides
+unit in India — membership, attendance, badge progression, fees and announcements,
+replacing paper records and spreadsheets.
+
+Built and maintained by volunteers, on free tiers, for a few hundred people. It
+handles children's data, so DPDP Act 2023 and safeguarding obligations apply.
+
+**Read [`docs/product/PRD.md`](./docs/product/PRD.md) before writing code** — the
+data model and auth architecture are decided there, and they are the expensive
+things to change later.
+
 A pnpm monorepo. `apps/*` holds deployables, `packages/*` holds shared libraries.
 
 ## Stack
@@ -60,4 +71,6 @@ docs/                architecture and product decisions
 
 ## Docs
 
-Architecture and product decisions live in [`docs/`](./docs/README.md).
+- [`docs/product/PRD.md`](./docs/product/PRD.md) — the standing product document
+- [`docs/adr/`](./docs/adr) — architecture decision records
+- [`docs/`](./docs/README.md) — how the records work
